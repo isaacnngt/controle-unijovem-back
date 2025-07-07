@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo != null ? titulo + ' - Sistema UNIJovem' : 'Sistema UNIJovem'}"></title>
+
+    <!-- Bootstrap CSS -->
+    <link href="/webjars/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar-brand {
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-brand h3 {
+            color: white;
+            font-weight: 700;
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .sidebar-brand .subtitle {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 15px 25px;
+            margin: 8px 15px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            font-weight: 500;
+        }
+
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            transform: translateX(10px);
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .sidebar .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .content-wrapper {
+            padding: 30px;
+        }
+
+        .page-header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.9);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            background: transparent;
+            border: none;
+            padding: 25px 30px 0;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .btn {
+            border-radius: 15px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: all 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(79, 172, 254, 0.6);
+        }
+
+        .btn-warning {
+            background: var(--warning-gradient);
+            box-shadow: 0 8px 25px rgba(67, 233, 123, 0.4);
+            color: #2c3e50;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(67, 233, 123, 0.6);
+        }
+
+        .btn-danger {
+            background: var(--danger-gradient);
+            box-shadow: 0 8px 25px rgba(250, 112, 154, 0.4);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(250, 112, 154, 0.6);
+        }
+
+        .btn-info {
+            background: var(--success-gradient);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--dark-gradient);
+            box-shadow: 0 8px 25px rgba(44, 62, 80, 0.4);
+        }
+
+        .form-control, .form-select {
+            border-radius: 15px;
+            padding: 15px 20px;
+            border: 2px solid rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.9);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            background: white;
+        }
+
+        .table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .table thead th {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 20px;
+            font-weight: 600;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+            transform: scale(1.02);
+        }
+
+        .table td {
+            padding: 20px;
+            border: none;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .badge {
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .alert {
+            border-radius: 15px;
+            border: none;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+        }
+
+        .progress {
+            height: 8px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            border-radius: 10px;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--primary-gradient);
+        }
+
+        .stats-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .floating-action {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .floating-action:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+        }
+
+        /* Animações */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .animate-delay-1 { animation-delay: 0.1s; }
+        .animate-delay-2 { animation-delay: 0.2s; }
+        .animate-delay-3 { animation-delay: 0.3s; }
+        .animate-delay-4 { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+<div class="d-flex">
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <h3><i class="fas fa-users"></i> UNIJovem</h3>
+            <div class="subtitle">Sistema de Gestão</div>
+        </div>
+
+        <div class="sidebar-nav">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/usuarios}">
+                        <i class="fas fa-users"></i> Jovens
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/usuarios/novo}">
+                        <i class="fas fa-user-plus"></i> Novo Jovem
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/usuarios/buscar}">
+                        <i class="fas fa-search"></i> Buscar
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/prestacao-contas}">
+                        <i class="fas fa-chart-line"></i> Prestação de Contas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/parametros}">
+                        <i class="fas fa-cog"></i> Parâmetros
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-wrapper">
+            <!-- Mobile Menu Toggle -->
+            <button class="btn btn-primary d-md-none mb-3" type="button" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Page Header -->
+            <div class="page-header animate-fade-in">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1 class="page-title" th:text="${titulo != null ? titulo : 'Dashboard'}"></h1>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="badge bg-light text-dark">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy')}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show animate-fade-in" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show animate-fade-in" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Content -->
+            <div th:fragment="content">
+                <!-- Conteúdo será inserido aqui -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="/webjars/jquery/3.7.0/jquery.min.js"></script>
+
+<script>
+    // Destacar menu ativo
+    $(document).ready(function() {
+        var path = window.location.pathname;
+        $('.nav-link').removeClass('active');
+        $('.nav-link').each(function() {
+            if (this.pathname === path) {
+                $(this).addClass('active');
+            }
+        });
+    });
+
+    // Toggle mobile sidebar
+    function toggleSidebar() {
+        $('#sidebar').toggleClass('show');
+    }
+
+    // Fechar sidebar ao clicar fora (mobile)
+    $(document).click(function(event) {
+        if (!$(event.target).closest('#sidebar, .btn').length) {
+            $('#sidebar').removeClass('show');
+        }
+    });
+</script>
+</body>
+</html>

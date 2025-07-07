@@ -1,0 +1,604 @@
+<!-- ========================================
+     PRESTAÇÃO DE CONTAS - src/main/resources/templates/prestacao-contas/lista.html
+     ======================================== -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Prestação de Contas - Sistema UNIJovem</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Header da Página -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-2">
+                <i class="fas fa-chart-line text-primary me-2"></i> Prestação de Contas
+            </h2>
+            <p class="text-muted mb-0">Acompanhe a situação financeira dos jovens</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-info" onclick="exportarRelatorio()">
+                <i class="fas fa-download me-2"></i> Exportar
+            </button>
+            <button class="btn btn-info" onclick="atualizarDados()">
+                <i class="fas fa-sync-alt me-2"></i> Atualizar
+            </button>
+        </div>
+    </div>
+
+    <!-- Dashboard de Estatísticas -->
+    <div class="row g-4 mb-4">
+        <!-- Total Arrecadado -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 bg-success text-white h-100 animate-fade-in">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-coins fa-3x me-3" style="opacity: 0.8;"></i>
+                        <div>
+                            <h6 class="text-uppercase mb-1">Total Arrecadado</h6>
+                            <h3 class="fw-bold mb-0" id="totalArrecadado">R$ 0,00</h3>
+                            <small class="opacity-75">Este ano</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jovens em Dia -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 bg-primary text-white h-100 animate-fade-in animate-delay-1">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle fa-3x me-3" style="opacity: 0.8;"></i>
+                        <div>
+                            <h6 class="text-uppercase mb-1">Em Dia</h6>
+                            <h3 class="fw-bold mb-0" id="jovensEmDia">0</h3>
+                            <small class="opacity-75">jovens</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pendências -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 bg-warning text-white h-100 animate-fade-in animate-delay-2">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle fa-3x me-3" style="opacity: 0.8;"></i>
+                        <div>
+                            <h6 class="text-uppercase mb-1">Pendências</h6>
+                            <h3 class="fw-bold mb-0" id="jovensPendentes">0</h3>
+                            <small class="opacity-75">jovens</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Taxa de Adimplência -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 bg-info text-white h-100 animate-fade-in animate-delay-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-percentage fa-3x me-3" style="opacity: 0.8;"></i>
+                        <div>
+                            <h6 class="text-uppercase mb-1">Taxa Adimplência</h6>
+                            <h3 class="fw-bold mb-0" id="taxaAdimplencia">0%</h3>
+                            <small class="opacity-75">do total</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros e Controles -->
+    <div class="card mb-4 animate-fade-in animate-delay-1">
+        <div class="card-body">
+            <form th:action="@{/prestacao-contas}" method="get">
+                <div class="row align-items-end g-3">
+                    <!-- Seletor de Ano -->
+                    <div class="col-md-3">
+                        <label for="anoVigente" class="form-label fw-bold">
+                            <i class="fas fa-calendar-alt text-primary me-2"></i>
+                            Ano Vigente
+                        </label>
+                        <select class="form-select form-select-lg" id="anoVigente" name="anoVigente" onchange="this.form.submit()">
+                            <option th:each="ano : ${anosDisponiveis}"
+                                    th:value="${ano}"
+                                    th:text="${ano}"
+                                    th:selected="${ano == anoSelecionado}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Filtro por Status -->
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-filter text-primary me-2"></i>
+                            Filtrar por Status
+                        </label>
+                        <select class="form-select form-select-lg" id="filtroStatus">
+                            <option value="todos">Todos os Status</option>
+                            <option value="emDia">Em Dia</option>
+                            <option value="pendente">Pendente</option>
+                            <option value="inadimplente">Inadimplente</option>
+                        </select>
+                    </div>
+
+                    <!-- Busca por Nome -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-search text-primary me-2"></i>
+                            Buscar Jovem
+                        </label>
+                        <div class="input-group input-group-lg">
+                            <input type="text" class="form-control" id="buscaNome" placeholder="Digite o nome...">
+                            <button type="button" class="btn btn-outline-secondary" onclick="limparBusca()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Resumo Visual -->
+                    <div class="col-md-2">
+                        <div class="d-flex flex-column gap-1">
+                            <div class="d-flex align-items-center">
+                                <div class="badge bg-success me-2" style="width: 12px; height: 12px;"></div>
+                                <small class="text-muted">Em Dia: <span id="countEmDia">0</span></small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="badge bg-warning me-2" style="width: 12px; height: 12px;"></div>
+                                <small class="text-muted">Pendente: <span id="countPendente">0</span></small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="badge bg-danger me-2" style="width: 12px; height: 12px;"></div>
+                                <small class="text-muted">Inadimplente: <span id="countInadimplente">0</span></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabela de Prestação de Contas -->
+    <div class="card animate-fade-in animate-delay-2">
+        <div class="card-header bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">
+                    <i class="fas fa-table text-primary me-2"></i>
+                    Relatório Detalhado - <span th:text="${anoSelecionado}">2025</span>
+                </h5>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="toggleVisualizacao()">
+                        <i class="fas fa-th" id="iconVisualizacao"></i>
+                        <span id="textoVisualizacao">Visualização Grid</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <!-- Visualização em Tabela -->
+            <div id="visualizacaoTabela">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="tabelaPrestacao">
+                        <thead class="table-dark">
+                        <tr>
+                            <th class="py-4">
+                                <i class="fas fa-user me-2"></i>Jovem
+                            </th>
+                            <th class="py-4 text-center">
+                                <i class="fas fa-tshirt me-2"></i>Camisa
+                            </th>
+                            <th class="py-4 text-center">
+                                <i class="fas fa-calendar-check me-2"></i>Mensalidade
+                            </th>
+                            <th class="py-4 text-center">
+                                <i class="fas fa-credit-card me-2"></i>Forma Pagamento
+                            </th>
+                            <th class="py-4 text-center">
+                                <i class="fas fa-chart-pie me-2"></i>Status Geral
+                            </th>
+                            <th class="py-4 text-center">
+                                <i class="fas fa-cog me-2"></i>Ações
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="prestacao, iterStat : ${prestacaoContas}"
+                            th:class="'prestacao-row animate-fade-in animate-delay-' + ${(iterStat.index % 4) + 1}"
+                            th:data-status="${(prestacao.percentualCamisaPago >= 100 and prestacao.percentualMensalidadePago >= 100) ? 'emDia' :
+                                                   (prestacao.percentualCamisaPago >= 50 or prestacao.percentualMensalidadePago >= 50) ? 'pendente' : 'inadimplente'}"
+                            th:data-nome="${prestacao.usuario.nome}">
+                            <!-- Jovem -->
+                            <td class="py-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar me-3">
+                                        <div class="avatar-circle"
+                                             th:classappend="${prestacao.usuario.sexo == 'M' ? 'bg-primary' : prestacao.usuario.sexo == 'F' ? 'bg-danger' : 'bg-secondary'}">
+                                            <i th:if="${prestacao.usuario.sexo == 'M'}" class="fas fa-mars text-white"></i>
+                                            <i th:if="${prestacao.usuario.sexo == 'F'}" class="fas fa-venus text-white"></i>
+                                            <i th:if="${prestacao.usuario.sexo == null}" class="fas fa-user text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1" th:text="${prestacao.usuario.nome}">Nome</h6>
+                                        <div class="d-flex gap-2">
+                                                    <span th:if="${prestacao.usuario.cargoMinisterial}"
+                                                          class="badge badge-sm bg-success-subtle text-success">
+                                                        <i class="fas fa-crown me-1"></i>Ministerial
+                                                    </span>
+                                            <span th:if="${prestacao.usuario.cargoUnijovem}"
+                                                  class="badge badge-sm bg-warning-subtle text-warning"
+                                                  th:text="${prestacao.usuario.cargoUnijovem}">Cargo</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Camisa -->
+                            <td class="py-4 text-center">
+                                <div class="progress-container">
+                                    <div class="circular-progress"
+                                         th:data-progress="${prestacao.percentualCamisaPago != null ? prestacao.percentualCamisaPago : 0}">
+                                        <div class="progress-circle">
+                                            <div class="progress-text">
+                                                <span th:text="${prestacao.percentualCamisaPago != null ? #numbers.formatDecimal(prestacao.percentualCamisaPago, 1, 0) + '%' : '0%'}">0%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="progress-details mt-2">
+                                        <small class="text-muted">
+                                            R$ <span th:text="${prestacao.valorCamisaPago != null ? #numbers.formatDecimal(prestacao.valorCamisaPago, 1, 2) : '0,00'}">0,00</span>
+                                            / R$ <span th:text="${prestacao.valorCamisaTotal != null ? #numbers.formatDecimal(prestacao.valorCamisaTotal, 1, 2) : '0,00'}">0,00</span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Mensalidade -->
+                            <td class="py-4 text-center">
+                                <div class="progress-container">
+                                    <div class="circular-progress"
+                                         th:data-progress="${prestacao.percentualMensalidadePago != null ? prestacao.percentualMensalidadePago : 0}">
+                                        <div class="progress-circle">
+                                            <div class="progress-text">
+                                                <span th:text="${prestacao.percentualMensalidadePago != null ? #numbers.formatDecimal(prestacao.percentualMensalidadePago, 1, 0) + '%' : '0%'}">0%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="progress-details mt-2">
+                                        <small class="text-muted">
+                                            R$ <span th:text="${prestacao.valorMensalidadePago != null ? #numbers.formatDecimal(prestacao.valorMensalidadePago, 1, 2) : '0,00'}">0,00</span>
+                                            / R$ <span th:text="${prestacao.valorMensalidadeTotal != null ? #numbers.formatDecimal(prestacao.valorMensalidadeTotal, 1, 2) : '0,00'}">0,00</span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Forma de Pagamento -->
+                            <td class="py-4 text-center">
+                                        <span th:if="${prestacao.formaPagamento}"
+                                              class="badge bg-secondary-subtle text-secondary"
+                                              th:text="${prestacao.formaPagamento}">Forma</span>
+                                <span th:unless="${prestacao.formaPagamento}"
+                                      class="text-muted">Não informado</span>
+                            </td>
+
+                            <!-- Status Geral -->
+                            <td class="py-4 text-center">
+                                <div th:if="${prestacao.percentualCamisaPago >= 100 and prestacao.percentualMensalidadePago >= 100}">
+                                            <span class="badge bg-success-subtle text-success fs-6">
+                                                <i class="fas fa-check-circle me-1"></i>Em Dia
+                                            </span>
+                                </div>
+                                <div th:if="${(prestacao.percentualCamisaPago < 100 or prestacao.percentualMensalidadePago < 100) and (prestacao.percentualCamisaPago >= 50 or prestacao.percentualMensalidadePago >= 50)}">
+                                            <span class="badge bg-warning-subtle text-warning fs-6">
+                                                <i class="fas fa-clock me-1"></i>Pendente
+                                            </span>
+                                </div>
+                                <div th:if="${prestacao.percentualCamisaPago < 50 and prestacao.percentualMensalidadePago < 50}">
+                                            <span class="badge bg-danger-subtle text-danger fs-6">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>Inadimplente
+                                            </span>
+                                </div>
+                            </td>
+
+                            <!-- Ações -->
+                            <td class="py-4 text-center">
+                                <div class="btn-group" role="group">
+                                    <a th:href="@{/prestacao-contas/usuario/{id}(id=${prestacao.usuario.id})}"
+                                       class="btn btn-sm btn-outline-info"
+                                       title="Ver Detalhes"
+                                       data-bs-toggle="tooltip">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a th:href="@{/usuarios/{id}/editar(id=${prestacao.usuario.id})}"
+                                       class="btn btn-sm btn-outline-primary"
+                                       title="Editar Jovem"
+                                       data-bs-toggle="tooltip">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-success"
+                                            title="Registrar Pagamento"
+                                            data-bs-toggle="tooltip"
+                                            th:onclick="'registrarPagamento(' + ${prestacao.usuario.id} + ', \'' + ${prestacao.usuario.nome} + '\')'">
+                                        <i class="fas fa-dollar-sign"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Estado Vazio -->
+            <div th:if="${prestacaoContas.isEmpty()}" class="empty-state py-5">
+                <i class="fas fa-chart-line"></i>
+                <h4 class="fw-bold mt-4">Nenhuma prestação de contas encontrada</h4>
+                <p class="text-muted mb-4">Não há dados para o ano selecionado</p>
+                <a th:href="@{/usuarios}" class="btn btn-primary">
+                    <i class="fas fa-users me-2"></i> Gerenciar Jovens
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Pagamento -->
+    <div class="modal fade" id="modalPagamento" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-dollar-sign me-2"></i>
+                        Registrar Pagamento
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="fw-bold mb-3">Jovem: <span id="nomeJovemPagamento"></span></h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Valor Camisa</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input type="number" class="form-control" id="valorCamisa" step="0.01">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Valor Mensalidade</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input type="number" class="form-control" id="valorMensalidade" step="0.01">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Forma de Pagamento</label>
+                            <select class="form-select" id="formaPagamento">
+                                <option value="">Selecione...</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="PIX">PIX</option>
+                                <option value="Cartão de Débito">Cartão de Débito</option>
+                                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                <option value="Transferência">Transferência Bancária</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="confirmarPagamento">
+                        <i class="fas fa-save me-2"></i>Registrar Pagamento
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-circle {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .circular-progress {
+        position: relative;
+        width: 60px;
+        height: 60px;
+        margin: 0 auto;
+    }
+
+    .progress-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: conic-gradient(#28a745 0deg, #28a745 0deg, #e9ecef 0deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .progress-circle::before {
+        content: '';
+        position: absolute;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: white;
+    }
+
+    .progress-text {
+        position: relative;
+        z-index: 1;
+        font-weight: bold;
+        font-size: 0.8rem;
+    }
+
+    .progress-details {
+        font-size: 0.75rem;
+    }
+
+    .badge-sm {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .prestacao-row:hover {
+        background-color: rgba(102, 126, 234, 0.05);
+    }
+
+    .animate-fade-in {
+        opacity: 0;
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .animate-delay-1 { animation-delay: 0.1s; }
+    .animate-delay-2 { animation-delay: 0.2s; }
+    .animate-delay-3 { animation-delay: 0.3s; }
+    .animate-delay-4 { animation-delay: 0.4s; }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    // Atualizar progresso circular
+    function atualizarProgressosCirculares() {
+        document.querySelectorAll('.circular-progress').forEach(element => {
+            const progress = parseFloat(element.dataset.progress) || 0;
+            const circle = element.querySelector('.progress-circle');
+            const deg = (progress / 100) * 360;
+
+            let color = '#dc3545'; // vermelho
+            if (progress >= 100) color = '#28a745'; // verde
+            else if (progress >= 50) color = '#ffc107'; // amarelo
+
+            circle.style.background = `conic-gradient(${color} ${deg}deg, #e9ecef ${deg}deg)`;
+        });
+    }
+
+    // Filtros
+    function aplicarFiltros() {
+        const filtroStatus = document.getElementById('filtroStatus').value;
+        const buscaNome = document.getElementById('buscaNome').value.toLowerCase();
+        const rows = document.querySelectorAll('.prestacao-row');
+
+        let contadores = { emDia: 0, pendente: 0, inadimplente: 0 };
+
+        rows.forEach(row => {
+            let mostrar = true;
+
+            // Filtro por status
+            if (filtroStatus !== 'todos' && row.dataset.status !== filtroStatus) {
+                mostrar = false;
+            }
+
+            // Filtro por nome
+            if (buscaNome && !row.dataset.nome.toLowerCase().includes(buscaNome)) {
+                mostrar = false;
+            }
+
+            row.style.display = mostrar ? '' : 'none';
+
+            // Contar visíveis
+            if (mostrar) {
+                contadores[row.dataset.status]++;
+            }
+        });
+
+        // Atualizar contadores
+        document.getElementById('countEmDia').textContent = contadores.emDia;
+        document.getElementById('countPendente').textContent = contadores.pendente;
+        document.getElementById('countInadimplente').textContent = contadores.inadimplente;
+    }
+
+    // Limpar busca
+    function limparBusca() {
+        document.getElementById('buscaNome').value = '';
+        document.getElementById('filtroStatus').value = 'todos';
+        aplicarFiltros();
+    }
+
+    // Registrar pagamento
+    function registrarPagamento(usuarioId, nomeUsuario) {
+        document.getElementById('nomeJovemPagamento').textContent = nomeUsuario;
+        new bootstrap.Modal(document.getElementById('modalPagamento')).show();
+    }
+
+    // Exportar relatório
+    function exportarRelatorio() {
+        // Implementar exportação
+        alert('Funcionalidade de exportação será implementada');
+    }
+
+    // Atualizar dados
+    function atualizarDados() {
+        location.reload();
+    }
+
+    // Calcular estatísticas
+    function calcularEstatisticas() {
+        const rows = document.querySelectorAll('.prestacao-row:not([style*="display: none"])');
+        let emDia = 0, pendentes = 0, totalArrecadado = 0;
+
+        rows.forEach(row => {
+            const status = row.dataset.status;
+            if (status === 'emDia') emDia++;
+            else if (status === 'pendente') pendentes++;
+
+            // Calcular total arrecadado (simplificado)
+            totalArrecadado += Math.random() * 100; // Placeholder
+        });
+
+        const total = rows.length;
+        const taxaAdimplencia = total > 0 ? Math.round((emDia / total) * 100) : 0;
+
+        document.getElementById('jovensEmDia').textContent = emDia;
+        document.getElementById('jovensPendentes').textContent = pendentes;
+        document.getElementById('taxaAdimplencia').textContent = taxaAdimplencia + '%';
+        document.getElementById('totalArrecadado').textContent = 'R$ ' + totalArrecadado.toFixed(2).replace('.', ',');
+    }
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', function() {
+        // Event listeners
+        document.getElementById('filtroStatus').addEventListener('change', aplicarFiltros);
+        document.getElementById('buscaNome').addEventListener('input', aplicarFiltros);
+
+        // Atualizar progressos circulares
+        atualizarProgressosCirculares();
+
+        // Calcular estatísticas
+        calcularEstatisticas();
+        aplicarFiltros();
+
+        // Tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+</body>
+</html>

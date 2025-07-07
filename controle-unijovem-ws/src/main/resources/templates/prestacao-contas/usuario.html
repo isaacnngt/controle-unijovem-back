@@ -1,0 +1,791 @@
+<!-- ========================================
+     PRESTAÇÃO DE CONTAS POR USUÁRIO - src/main/resources/templates/prestacao-contas/usuario.html
+     ======================================== -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Prestação de Contas Individual - Sistema UNIJovem</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Header da Página -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-2">
+                <i class="fas fa-user-chart text-primary me-2"></i> Prestação de Contas Individual
+            </h2>
+            <p class="text-muted mb-0">Histórico financeiro detalhado do jovem</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/prestacao-contas}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Voltar
+            </a>
+            <button class="btn btn-success" onclick="registrarPagamento()">
+                <i class="fas fa-plus me-2"></i> Novo Pagamento
+            </button>
+            <button class="btn btn-info" onclick="exportarRelatorio()">
+                <i class="fas fa-download me-2"></i> Exportar
+            </button>
+        </div>
+    </div>
+
+    <!-- Perfil do Jovem -->
+    <div class="card mb-4 animate-fade-in">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <div class="avatar-profile">
+                        <div class="avatar-circle-lg bg-primary">
+                            <i class="fas fa-user text-white fa-2x"></i>
+                        </div>
+                        <div class="status-indicator bg-success"></div>
+                    </div>
+                </div>
+                <div class="col">
+                    <h3 class="fw-bold mb-1">João Silva</h3>
+                    <div class="d-flex flex-wrap gap-3 mb-2">
+                            <span class="text-muted">
+                                <i class="fas fa-mars text-primary me-1"></i> Masculino
+                            </span>
+                        <span class="text-muted">
+                                <i class="fas fa-birthday-cake text-warning me-1"></i> 22 anos
+                            </span>
+                        <span class="text-muted">
+                                <i class="fas fa-user-tie text-info me-1"></i> Pastor João
+                            </span>
+                    </div>
+                    <div class="d-flex gap-2">
+                            <span class="badge bg-success-subtle text-success">
+                                <i class="fas fa-crown me-1"></i> Cargo Ministerial
+                            </span>
+                        <span class="badge bg-warning-subtle text-warning">
+                                <i class="fas fa-star me-1"></i> Presidente
+                            </span>
+                        <span class="badge bg-primary-subtle text-primary">
+                                <i class="fas fa-check-circle me-1"></i> Em Dia
+                            </span>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="text-center">
+                        <h4 class="fw-bold text-success mb-1">98%</h4>
+                        <small class="text-muted">Taxa de Adimplência</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard de Estatísticas -->
+    <div class="row g-4 mb-4">
+        <!-- Total Pago -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 bg-success text-white h-100 animate-fade-in animate-delay-1">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-coins fa-3x me-3" style="opacity: 0.8;"></i>
+                        <div>
+                            <h6 class="text-uppercase mb-1">Total Pago</h6>
+                            <h3 class="fw-bold mb-0">R$ 2.847,50</h3>
+                            <small class="opacity-75">Histórico</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Anos Participando -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 bg-primary text-white h-100 animate-fade-in animate-delay-2">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-calendar-check fa-3x me-3" style="opacity: 0.8;"></i>
+                        <div>
+                            <h6 class="text-uppercase mb-1">Anos Participando</h6>
+                            <h3 class="fw-bold mb-0">4</h3>
+                            <small class="opacity-75">anos</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensalidades Pagas -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 bg-info text-white h-100 animate-fade-in animate-delay-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-calendar-alt fa-3x me-3" style="opacity: 0.8;"></i>
+                        <div>
+                            <h6 class="text-uppercase mb-1">Mensalidades</h6>
+                            <h3 class="fw-bold mb-0">46/48</h3>
+                            <small class="opacity-75">pagas</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Última Atualização -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 bg-warning text-white h-100 animate-fade-in animate-delay-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-clock fa-3x me-3" style="opacity: 0.8;"></i>
+                        <div>
+                            <h6 class="text-uppercase mb-1">Último Pagamento</h6>
+                            <h3 class="fw-bold mb-0">15/12</h3>
+                            <small class="opacity-75">dez/2024</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline de Evolução -->
+    <div class="card mb-4 animate-fade-in animate-delay-1">
+        <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <h5 class="fw-bold mb-0">
+                <i class="fas fa-chart-line me-2"></i>
+                Evolução dos Pagamentos
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="timeline">
+                <div th:each="prestacao, iterStat : ${prestacaoContas}"
+                     class="timeline-item"
+                     th:classappend="${iterStat.last ? 'timeline-item-current' : ''}">
+
+                    <div class="timeline-marker">
+                        <div class="timeline-circle"
+                             th:classappend="${prestacao.percentualCamisaPago >= 100 and prestacao.percentualMensalidadePago >= 100 ? 'bg-success' :
+                                               prestacao.percentualCamisaPago >= 50 or prestacao.percentualMensalidadePago >= 50 ? 'bg-warning' : 'bg-danger'}">
+                            <i th:if="${prestacao.percentualCamisaPago >= 100 and prestacao.percentualMensalidadePago >= 100}"
+                               class="fas fa-check text-white"></i>
+                            <i th:if="${(prestacao.percentualCamisaPago < 100 or prestacao.percentualMensalidadePago < 100) and (prestacao.percentualCamisaPago >= 50 or prestacao.percentualMensalidadePago >= 50)}"
+                               class="fas fa-clock text-white"></i>
+                            <i th:if="${prestacao.percentualCamisaPago < 50 and prestacao.percentualMensalidadePago < 50}"
+                               class="fas fa-exclamation text-white"></i>
+                        </div>
+                    </div>
+
+                    <div class="timeline-content">
+                        <div class="timeline-card">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="fw-bold mb-0" th:text="'Ano ' + ${prestacao.anoVigente}">Ano 2025</h5>
+                                <div class="d-flex gap-2">
+                                        <span th:if="${prestacao.percentualCamisaPago >= 100 and prestacao.percentualMensalidadePago >= 100}"
+                                              class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Completo
+                                        </span>
+                                    <span th:if="${(prestacao.percentualCamisaPago < 100 or prestacao.percentualMensalidadePago < 100) and (prestacao.percentualCamisaPago >= 50 or prestacao.percentualMensalidadePago >= 50)}"
+                                          class="badge bg-warning">
+                                            <i class="fas fa-clock me-1"></i>Pendente
+                                        </span>
+                                    <span th:if="${prestacao.percentualCamisaPago < 50 and prestacao.percentualMensalidadePago < 50}"
+                                          class="badge bg-danger">
+                                            <i class="fas fa-exclamation me-1"></i>Atrasado
+                                        </span>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <!-- Camisa -->
+                                <div class="col-md-6">
+                                    <div class="payment-section">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="fw-bold mb-0">
+                                                <i class="fas fa-tshirt text-primary me-2"></i>Camisa
+                                            </h6>
+                                            <span class="badge bg-primary-subtle text-primary">
+                                                    <span th:text="${prestacao.percentualCamisaPago != null ? #numbers.formatDecimal(prestacao.percentualCamisaPago, 1, 0) + '%' : '0%'}">100%</span>
+                                                </span>
+                                        </div>
+                                        <div class="progress mb-2" style="height: 8px;">
+                                            <div class="progress-bar bg-primary"
+                                                 th:style="'width: ' + ${prestacao.percentualCamisaPago != null ? prestacao.percentualCamisaPago : 0} + '%'">
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <small class="text-success fw-bold">
+                                                R$ <span th:text="${prestacao.valorCamisaPago != null ? #numbers.formatDecimal(prestacao.valorCamisaPago, 1, 2) : '0,00'}">35,00</span>
+                                            </small>
+                                            <small class="text-muted">
+                                                / R$ <span th:text="${prestacao.valorCamisaTotal != null ? #numbers.formatDecimal(prestacao.valorCamisaTotal, 1, 2) : '0,00'}">35,00</span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Mensalidade -->
+                                <div class="col-md-6">
+                                    <div class="payment-section">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="fw-bold mb-0">
+                                                <i class="fas fa-calendar-check text-success me-2"></i>Mensalidade
+                                            </h6>
+                                            <span class="badge bg-success-subtle text-success">
+                                                    <span th:text="${prestacao.percentualMensalidadePago != null ? #numbers.formatDecimal(prestacao.percentualMensalidadePago, 1, 0) + '%' : '0%'}">92%</span>
+                                                </span>
+                                        </div>
+                                        <div class="progress mb-2" style="height: 8px;">
+                                            <div class="progress-bar bg-success"
+                                                 th:style="'width: ' + ${prestacao.percentualMensalidadePago != null ? prestacao.percentualMensalidadePago : 0} + '%'">
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <small class="text-success fw-bold">
+                                                R$ <span th:text="${prestacao.valorMensalidadePago != null ? #numbers.formatDecimal(prestacao.valorMensalidadePago, 1, 2) : '0,00'}">550,00</span>
+                                            </small>
+                                            <small class="text-muted">
+                                                / R$ <span th:text="${prestacao.valorMensalidadeTotal != null ? #numbers.formatDecimal(prestacao.valorMensalidadeTotal, 1, 2) : '0,00'}">600,00</span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informações Adicionais -->
+                            <div class="mt-3 p-3 bg-light rounded">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <small class="text-muted d-block">Forma de Pagamento</small>
+                                        <span class="fw-bold" th:text="${prestacao.formaPagamento ?: 'Não informado'}">PIX</span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted d-block">Total Pago no Ano</small>
+                                        <span class="fw-bold text-success">
+                                                R$ <span th:text="${(prestacao.valorCamisaPago ?: 0) + (prestacao.valorMensalidadePago ?: 0)}">585,00</span>
+                                            </span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted d-block">Última Atualização</small>
+                                        <span class="fw-bold" th:if="${prestacao.dataAlteracao}"
+                                              th:text="${#temporals.format(prestacao.dataAlteracao, 'dd/MM/yyyy')}">15/12/2024</span>
+                                        <span class="fw-bold" th:unless="${prestacao.dataAlteracao}">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ações -->
+                            <div class="mt-3 d-flex gap-2">
+                                <button class="btn btn-sm btn-outline-primary"
+                                        th:onclick="'editarPagamento(' + ${prestacao.anoVigente} + ')'">
+                                    <i class="fas fa-edit me-1"></i> Editar
+                                </button>
+                                <button class="btn btn-sm btn-outline-success"
+                                        th:onclick="'adicionarPagamento(' + ${prestacao.anoVigente} + ')'">
+                                    <i class="fas fa-plus me-1"></i> Adicionar
+                                </button>
+                                <button class="btn btn-sm btn-outline-info"
+                                        th:onclick="'verDetalhes(' + ${prestacao.anoVigente} + ')'">
+                                    <i class="fas fa-eye me-1"></i> Detalhes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estado Vazio -->
+    <div th:if="${prestacaoContas.isEmpty()}" class="card animate-fade-in">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-chart-line fa-4x text-muted mb-4" style="opacity: 0.3;"></i>
+            <h4 class="fw-bold text-muted mb-3">Nenhum Histórico Encontrado</h4>
+            <p class="text-muted mb-4">
+                Este jovem ainda não possui registros de prestação de contas.<br>
+                Que tal criar o primeiro registro?
+            </p>
+            <button class="btn btn-primary btn-lg" onclick="registrarPagamento()">
+                <i class="fas fa-plus me-2"></i> Criar Primeiro Registro
+            </button>
+        </div>
+    </div>
+
+    <!-- Resumo Geral -->
+    <div class="card mt-4 animate-fade-in animate-delay-2" th:if="${!prestacaoContas.isEmpty()}">
+        <div class="card-header bg-light">
+            <h5 class="fw-bold mb-0">
+                <i class="fas fa-chart-pie text-primary me-2"></i>
+                Resumo Geral
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <div class="circular-chart" data-percentage="98">
+                            <div class="chart-inner">
+                                <span class="chart-number">98%</span>
+                                <span class="chart-label">Adimplência</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="stat-item">
+                                <h6 class="text-muted mb-1">Total Investido</h6>
+                                <h4 class="fw-bold text-primary">R$ 2.847,50</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-item">
+                                <h6 class="text-muted mb-1">Média Mensal</h6>
+                                <h4 class="fw-bold text-success">R$ 59,32</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-item">
+                                <h6 class="text-muted mb-1">Melhor Ano</h6>
+                                <h4 class="fw-bold text-warning">2023 (100%)</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-item">
+                                <h6 class="text-muted mb-1">Status Atual</h6>
+                                <span class="badge bg-success fs-6">
+                                        <i class="fas fa-check-circle me-1"></i>Em Dia
+                                    </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Pagamento -->
+    <div class="modal fade" id="modalPagamento" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-dollar-sign me-2"></i>
+                        Registrar Novo Pagamento
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="fw-bold mb-3">Jovem: João Silva</h6>
+                    <form id="formPagamento">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Ano de Referência</label>
+                                <select class="form-select" id="anoReferencia">
+                                    <option value="2025">2025</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Tipo de Pagamento</label>
+                                <select class="form-select" id="tipoPagamento">
+                                    <option value="mensalidade">Mensalidade</option>
+                                    <option value="camisa">Camisa</option>
+                                    <option value="ambos">Ambos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Valor Mensalidade</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" class="form-control" id="valorMensalidade" step="0.01" placeholder="0,00">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Valor Camisa</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" class="form-control" id="valorCamisa" step="0.01" placeholder="0,00">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Forma de Pagamento</label>
+                                <select class="form-select" id="formaPagamento">
+                                    <option value="">Selecione...</option>
+                                    <option value="PIX">PIX</option>
+                                    <option value="Dinheiro">Dinheiro</option>
+                                    <option value="Cartão de Débito">Cartão de Débito</option>
+                                    <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                    <option value="Transferência">Transferência Bancária</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Observações</label>
+                                <textarea class="form-control" id="observacoes" rows="3" placeholder="Observações opcionais..."></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="salvarPagamento()">
+                        <i class="fas fa-save me-2"></i>Registrar Pagamento
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-profile {
+        position: relative;
+    }
+
+    .avatar-circle-lg {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .status-indicator {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 3px solid white;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, #667eea, #764ba2);
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -22px;
+        top: 0;
+    }
+
+    .timeline-circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .timeline-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        border: 1px solid rgba(0,0,0,0.05);
+        margin-left: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .timeline-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+
+    .timeline-item-current .timeline-card {
+        border-left: 5px solid #667eea;
+    }
+
+    .payment-section {
+        background: rgba(0,0,0,0.02);
+        padding: 15px;
+        border-radius: 10px;
+    }
+
+    .circular-chart {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+        border-radius: 50%;
+        background: conic-gradient(#28a745 0deg, #28a745 352deg, #e9ecef 352deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .circular-chart::before {
+        content: '';
+        position: absolute;
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: white;
+    }
+
+    .chart-inner {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+    }
+
+    .chart-number {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #28a745;
+    }
+
+    .chart-label {
+        display: block;
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 15px;
+        border-radius: 10px;
+        background: rgba(0,0,0,0.02);
+    }
+
+    .animate-fade-in {
+        opacity: 0;
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+
+    .animate-delay-1 { animation-delay: 0.2s; }
+    .animate-delay-2 { animation-delay: 0.4s; }
+    .animate-delay-3 { animation-delay: 0.6s; }
+    .animate-delay-4 { animation-delay: 0.8s; }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    // Registrar novo pagamento
+    function registrarPagamento() {
+        new bootstrap.Modal(document.getElementById('modalPagamento')).show();
+    }
+
+    // Editar pagamento existente
+    function editarPagamento(ano) {
+        // Pré-preencher modal com dados do ano
+        document.getElementById('anoReferencia').value = ano;
+        new bootstrap.Modal(document.getElementById('modalPagamento')).show();
+    }
+
+    // Adicionar pagamento ao ano
+    function adicionarPagamento(ano) {
+        document.getElementById('anoReferencia').value = ano;
+        new bootstrap.Modal(document.getElementById('modalPagamento')).show();
+    }
+
+    // Ver detalhes do ano
+    function verDetalhes(ano) {
+        alert(`Detalhes do ano ${ano} - Funcionalidade será implementada`);
+    }
+
+    // Salvar pagamento
+    function salvarPagamento() {
+        const dados = {
+            ano: document.getElementById('anoReferencia').value,
+            tipo: document.getElementById('tipoPagamento').value,
+            valorMensalidade: document.getElementById('valorMensalidade').value,
+            valorCamisa: document.getElementById('valorCamisa').value,
+            formaPagamento: document.getElementById('formaPagamento').value,
+            observacoes: document.getElementById('observacoes').value
+        };
+
+        // Validar dados
+        if (!dados.formaPagamento) {
+            alert('Selecione a forma de pagamento');
+            return;
+        }
+
+        if (!dados.valorMensalidade && !dados.valorCamisa) {
+            alert('Informe pelo menos um valor (mensalidade ou camisa)');
+            return;
+        }
+
+        // Simular salvamento
+        console.log('Salvando pagamento:', dados);
+
+        // Fechar modal e recarregar página
+        bootstrap.Modal.getInstance(document.getElementById('modalPagamento')).hide();
+
+        // Mostrar sucesso
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show';
+        alert.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>
+                Pagamento registrado com sucesso!
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+        document.querySelector('.content-wrapper').insertBefore(alert, document.querySelector('.content-wrapper').firstChild);
+
+        // Simular atualização dos dados
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
+    }
+
+    // Exportar relatório
+    function exportarRelatorio() {
+        // Simular exportação
+        const dados = {
+            jovem: 'João Silva',
+            totalPago: 'R$ 2.847,50',
+            anosParticipacao: 4,
+            taxaAdimplencia: '98%'
+        };
+
+        console.log('Exportando relatório:', dados);
+        alert('Relatório exportado com sucesso!\nVerifique a pasta de downloads.');
+    }
+
+    // Atualizar gráfico circular
+    function atualizarGraficoCircular() {
+        const chart = document.querySelector('.circular-chart');
+        if (chart) {
+            const percentage = parseInt(chart.dataset.percentage) || 98;
+            const deg = (percentage / 100) * 360;
+            chart.style.background = `conic-gradient(#28a745 ${deg}deg, #e9ecef ${deg}deg)`;
+        }
+    }
+
+    // Animar contadores
+    function animarContadores() {
+        const contadores = [
+            { elemento: '.card-body h3', valor: 2847.50, prefix: 'R$ ', suffix: '' },
+            { elemento: '.card-body h3:nth-of-type(2)', valor: 4, prefix: '', suffix: '' },
+            { elemento: '.card-body h3:nth-of-type(3)', valor: 46, prefix: '', suffix: '/48' },
+            { elemento: '.card-body h3:nth-of-type(4)', valor: 15, prefix: '', suffix: '/12' }
+        ];
+
+        // Implementar animação de contadores se necessário
+    }
+
+    // Configurar tooltips para timeline
+    function configurarTooltips() {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+
+    // Filtrar timeline por status
+    function filtrarTimeline(status) {
+        const items = document.querySelectorAll('.timeline-item');
+        items.forEach(item => {
+            const badge = item.querySelector('.badge');
+            if (status === 'todos' || (badge && badge.textContent.toLowerCase().includes(status))) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    // Configurar modal de pagamento
+    function configurarModal() {
+        const modal = document.getElementById('modalPagamento');
+        const tipoPagamento = document.getElementById('tipoPagamento');
+        const valorMensalidade = document.getElementById('valorMensalidade');
+        const valorCamisa = document.getElementById('valorCamisa');
+
+        // Event listener para tipo de pagamento
+        tipoPagamento.addEventListener('change', function() {
+            const tipo = this.value;
+
+            // Habilitar/desabilitar campos baseado no tipo
+            if (tipo === 'mensalidade') {
+                valorMensalidade.disabled = false;
+                valorCamisa.disabled = true;
+                valorCamisa.value = '';
+            } else if (tipo === 'camisa') {
+                valorMensalidade.disabled = true;
+                valorCamisa.disabled = false;
+                valorMensalidade.value = '';
+            } else if (tipo === 'ambos') {
+                valorMensalidade.disabled = false;
+                valorCamisa.disabled = false;
+            }
+        });
+
+        // Limpar modal ao fechar
+        modal.addEventListener('hidden.bs.modal', function() {
+            document.getElementById('formPagamento').reset();
+            valorMensalidade.disabled = false;
+            valorCamisa.disabled = false;
+        });
+    }
+
+    // Inicializar página
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configurar componentes
+        atualizarGraficoCircular();
+        configurarTooltips();
+        configurarModal();
+
+        // Animar entrada dos elementos
+        const elementos = document.querySelectorAll('.animate-fade-in');
+        elementos.forEach((el, index) => {
+            el.style.animationDelay = (index * 0.1) + 's';
+        });
+
+        // Configurar atalhos de teclado
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + N = Novo pagamento
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                registrarPagamento();
+            }
+
+            // ESC = Fechar modal
+            if (e.key === 'Escape') {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalPagamento'));
+                if (modal) modal.hide();
+            }
+        });
+
+        console.log('Página de prestação de contas individual carregada com sucesso!');
+    });
+</script>
+</body>
+</html>
